@@ -32,7 +32,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   local:
-    path: /mnt
+    path: /pv/mysql
   nodeAffinity:
     required:
       nodeSelectorTerms:
