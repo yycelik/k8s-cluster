@@ -28,7 +28,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   local:
-    path: /pv/jenkins
+    path: /pv/nexus
   nodeAffinity:
     required:
       nodeSelectorTerms:
