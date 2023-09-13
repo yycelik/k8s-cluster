@@ -3,7 +3,7 @@
 kubectl create namespace devops-tools
 
 #
-sudo cat >>serviceAccount.yaml<<EOF
+kubectl create -f - <<EOF
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -34,11 +34,9 @@ subjects:
   namespace: devops-tools
 EOF
 
-#
-kubectl apply -f serviceAccount.yaml
 
 #
-sudo cat >>volume.yaml<<EOF
+kubectl create -f - <<EOF
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
@@ -86,11 +84,9 @@ spec:
       storage: 3Gi
 EOF
 
-#
-kubectl create -f volume.yaml
 
 #
-sudo cat >>deployment.yaml<<EOF
+kubectl create -f - <<EOF
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -150,11 +146,9 @@ spec:
               claimName: jenkins-pv-claim
 EOF
 
-#
-kubectl apply -f deployment.yaml
 
 #
-sudo cat >>service.yaml<<EOF
+kubectl create -f - <<EOF
 apiVersion: v1
 kind: Service
 metadata:
@@ -177,11 +171,73 @@ spec:
   type: LoadBalancer
 EOF
 
-#
-kubectl apply -f service.yaml
-
-#
-kubectl get service -n devops-tools
 
 #
 kubectl exec -it jenkins-559d8cd85c-cfcgk cat /var/jenkins_home/secrets/initialAdminPassword -n devops-tools
+
+
+
+# cert manager and nginx https configuration
+kubectl create -f - <<EOF
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: selfsigned-cluster-issuer
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: jenkins-ca
+  namespace: cert-manager
+spec:
+  isCA: true
+  commonName: jenkins-ca
+  secretName: jenkins-ca
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  dnsNames:
+  - jenkins.smart.com
+  issuerRef:
+    name: selfsigned-cluster-issuer
+    kind: ClusterIssuer
+    group: cert-manager.io
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: jenkins-cluster-issuer  
+spec:
+  ca:
+    secretName: jenkins-ca
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: jenkins-cluster-issuer
+  name: jenkins-ingress
+  namespace: devops-tools
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: jenkins.smart.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: /
+        backend:
+          service:
+            name: jenkins-service
+            port:
+              number: 8080
+  tls:
+  - hosts:
+    - jenkins.smart.com
+    secretName: jenkins-tls
+
+EOF
+
