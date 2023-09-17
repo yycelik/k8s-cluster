@@ -11,7 +11,7 @@ helm install my-nexus sonatype/nexus-repository-manager -n devops-tools --create
 kubectl --namespace devops-tools patch svc my-nexus-nexus-repository-manager -p '{"spec": {"type": "LoadBalancer"}}'
 
 # 
-sudo cat >>volume.yaml<<EOF
+sudo kubectl create -f - <<EOF
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -39,16 +39,13 @@ spec:
           - {worker-node-name}
 EOF
 
-#	  
-kubectl create -f volume.yaml
-
 # get admin pass from node
 kubectl exec -it my-nexus-nexus-repository-manager-5fc8cf4d97-f2wq8 cat /nexus-data/admin.password -n devops-tools
 
 
 
 # cert manager and nginx https configuration
-kubectl apply -f - <<EOF
+sudo kubectl create -f - <<EOF
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
@@ -89,6 +86,9 @@ kind: Ingress
 metadata:
   annotations:
     cert-manager.io/cluster-issuer: nexus-cluster-issuer
+    nginx.org/client-max-body-size: '0'
+    nginx.org/proxy-connect-timeout: 10000s
+    nginx.org/proxy-read-timeout: 10000s
   name: nexus-ingress
   namespace: devops-tools
 spec:
@@ -104,10 +104,46 @@ spec:
             name: my-nexus-nexus-repository-manager
             port:
               number: 8081
+  - host: docker-s.nexus.smart.com
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: my-nexus-nexus-repository-manager
+              port:
+                number: 8082
+  - host: docker-r.nexus.smart.com
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: my-nexus-nexus-repository-manager
+              port:
+                number: 8083
+  - host: docker-p.nexus.smart.com
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: my-nexus-nexus-repository-manager
+              port:
+                number: 8084
   tls:
   - hosts:
     - nexus.smart.com
+    - docker-s.nexus.smart.com
+    - docker-r.nexus.smart.com
+    - docker-p.nexus.smart.com
     secretName: nexus-tls
 
 EOF
+
+# add ui and docker port to the service
+kubectl --namespace devops-tools patch svc my-nexus-nexus-repository-manager -p '{"spec": {"ports": [{"name": "nexus-ui","protocol": "TCP","port": 8081,"targetPort": 8081},{"name": "nexus-docker-snapshoot","protocol": "TCP","port": 8082,"targetPort": 8082},{"name": "nexus-docker-release","protocol": "TCP","port": 8083,"targetPort": 8083},{"name": "nexus-docker-public","protocol": "TCP","port": 8084,"targetPort": 8084}]}}'
 
