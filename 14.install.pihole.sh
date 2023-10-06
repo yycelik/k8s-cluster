@@ -5,7 +5,27 @@ helm repo add mojo2600 https://mojo2600.github.io/pihole-kubernetes/
 
 helm repo update
 
-helm install smart mojo2600/pihole --create-namespace --namespace tools --set serviceWeb.type=LoadBalancer --set persistentVolumeClaim.enabled=true
+sudo cat >>myvalues.yaml<<EOF
+persistentVolumeClaim:
+  enabled: true
+
+serviceWeb:
+  loadBalancerIP: 192.168.0.205
+  annotations:
+    metallb.universe.tf/allow-shared-ip: pihole-svc
+  type: LoadBalancer
+
+serviceDns:
+  loadBalancerIP: 192.168.0.205
+  annotations:
+    metallb.universe.tf/allow-shared-ip: pihole-svc
+  type: LoadBalancer
+EOF
+
+
+helm install smart mojo2600/pihole --create-namespace --namespace tools -f myvalues.yaml
+
+#helm install smart mojo2600/pihole --create-namespace --namespace tools --set serviceWeb.type=LoadBalancer --set persistentVolumeClaim.enabled=true
 
 #kubectl --namespace tools patch svc smart-pihole-web -p '{"spec": {"type": "LoadBalancer"}}'
 
