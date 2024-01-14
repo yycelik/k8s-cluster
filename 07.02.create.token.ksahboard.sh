@@ -1,5 +1,5 @@
 # create service acccount yaml
-sudo cat >>create-service-account.yaml<<EOF
+sudo kubectl create -f - <<EOF
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -20,8 +20,5 @@ subjects:
   namespace: kubernetes-dashboard
 EOF
 
-# create service acccount
-kubectl apply -f create-service-account.yaml
-
 # get token for login
-kubectl -n kubernetes-dashboard create token admin-user
+kubectl -n kubernetes-dashboard create token admin-user --duration=0s
