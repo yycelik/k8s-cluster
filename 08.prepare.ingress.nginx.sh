@@ -1,23 +1,4 @@
-openssl genrsa -out ca.key 4096
-
-openssl req -new -x509 -sha256 -days 365 -key ca.key -out ca.crt
-#Country Name (2 letter code) [AU]:tr
-#State or Province Name (full name) [Some-State]:uskudar
-#Locality Name (eg, city) []:ist
-#Organization Name (eg, company) [Internet Widgits Pty Ltd]:smart
-#Organizational Unit Name (eg, section) []:tech
-#Common Name (e.g. server FQDN or YOUR name) []:*.smart.com
-#Email Address []:info@smart.com
-
-
-# on windows click ca.crt and install
-# on windows click ca.crt and install
-# on windows click ca.crt and install
-# on windows click ca.crt and install
-
-
-kubectl create secret tls smart-ca-secret -n cert-manager  --cert=ca.crt --key=ca.key
-
+# no need if you run before
 sudo kubectl create -f - <<EOF
 ---
 apiVersion: cert-manager.io/v1
