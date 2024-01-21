@@ -21,4 +21,4 @@ subjects:
 EOF
 
 # get token for login
-kubectl -n kubernetes-dashboard create token admin-user --duration=0s
+kubectl -n kubernetes-dashboard create token admin-user --duration=87600h
