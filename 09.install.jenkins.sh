@@ -2,7 +2,7 @@
 #
 kubectl create namespace devops-tools
 
-#
+# create service user
 kubectl create -f - <<EOF
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -34,8 +34,22 @@ subjects:
   namespace: devops-tools
 EOF
 
+# using longhorn as storage
+kubectl create -f - <<EOF
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jenkins-pv-claim
+  namespace: devops-tools
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+EOF
 
-#
+# using static node as storage
 kubectl create -f - <<EOF
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
@@ -85,7 +99,7 @@ spec:
 EOF
 
 
-#
+# create deployment
 kubectl create -f - <<EOF
 apiVersion: apps/v1
 kind: Deployment
@@ -147,7 +161,7 @@ spec:
 EOF
 
 
-#
+# create service
 kubectl create -f - <<EOF
 apiVersion: v1
 kind: Service
@@ -172,5 +186,5 @@ spec:
 EOF
 
 
-#
-kubectl exec -it jenkins-559d8cd85c-cfcgk cat /var/jenkins_home/secrets/initialAdminPassword -n devops-tools
+# get init pass from pod-name
+kubectl exec -it {pod-name} cat /var/jenkins_home/secrets/initialAdminPassword -n devops-tools
