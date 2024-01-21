@@ -25,7 +25,7 @@ kubectl create secret tls smart-ca-secret --cert=certificate.crt --key=private.k
 kubectl create secret tls smart-ca-secret --cert=certificate.crt --key=private.key -n cert-manager
 kubectl create secret tls smart-ca-secret --cert=certificate.crt --key=private.key -n devops-tools
 kubectl create secret tls smart-ca-secret --cert=certificate.crt --key=private.key -n ingress-nginx
-kubectl create secret tls smart-ca-secret --cert=certificate.crt --key=private.key -n kubernetes-dashboard
+kubectl create secret tls smart-ca-secret --cert=certificate.crt --key=private.key -n longhorn-system
 
 
 # click crt to install windows
