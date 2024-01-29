@@ -49,7 +49,7 @@ sudo kubectl create -f - <<EOF
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: my-app-ingress
+  name: s3t-acme-ingress
   namespace: default
   annotations:
     cert-manager.io/cluster-issuer: "s3t-clusterissuer"
@@ -68,3 +68,8 @@ spec:
               number: 8089
 EOF
 
+# control certificate
+kubectl get certificate
+
+# delete ingress
+sudo kubectl delete ingress s3t-acme-ingress
