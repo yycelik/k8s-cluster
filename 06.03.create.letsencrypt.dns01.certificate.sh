@@ -34,4 +34,5 @@ spec:
     name: letsencrypt-prod
   dnsNames:
   - "*.s3t.co"
+  - "*.nexus.s3t.co"
 EOF

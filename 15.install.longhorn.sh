@@ -4,6 +4,59 @@ helm repo update
 
 helm install longhorn longhorn/longhorn --namespace longhorn-system --create-namespace
 
+
+
+#create user
+USER=admin; PASSWORD=xxxxxx; echo "${USER}:$(openssl passwd -stdin -apr1 <<< ${PASSWORD})" >> auth
+kubectl delete secret basic-auth -n longhorn-system
+kubectl create secret generic basic-auth --from-file=auth -n longhorn-system
+
+
+# to use wild card
+# first u should install replicator for secret
+kubectl delete ingress longhorn-ingress -n longhorn-system
+sudo kubectl create -f - <<EOF
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/ssl-redirect: 'false'
+    nginx.ingress.kubernetes.io/auth-secret: basic-auth
+    nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required '
+    nginx.ingress.kubernetes.io/proxy-body-size: 10000m
+  name: longhorn-ingress
+  namespace: longhorn-system
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: longhorn.s3t.co
+    http:
+      paths:
+      - pathType: Prefix
+        path: /
+        backend:
+          service:
+            name: longhorn-frontend
+            port:
+              number: 80
+  tls:
+  - hosts:
+    - longhorn.s3t.co
+    secretName: s3t-wildcard-cert-prod
+EOF
+
+
+
+
+
+
+
+
+
+
+#self sign ingress
 sudo kubectl create -f - <<EOF
 ---
 apiVersion: networking.k8s.io/v1

@@ -58,6 +58,48 @@ spec:
 EOF
 
 
+
+
+# to use wild card
+# first u should install replicator for secret
+kubectl delete ingress pihole-ingress -n tools
+sudo kubectl create -f - <<EOF
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.org/client-max-body-size: '0'
+    nginx.org/proxy-connect-timeout: 10000s
+    nginx.org/proxy-read-timeout: 10000s
+  name: pihole-ingress
+  namespace: tools
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: pihole.s3t.co
+    http:
+      paths:
+      - pathType: Prefix
+        path: /
+        backend:
+          service:
+            name: smart-pihole-web
+            port:
+              number: 80
+  tls:
+  - hosts:
+    - pihole.s3t.co
+    secretName: s3t-wildcard-cert-prod
+EOF
+
+
+
+
+
+
+
+# selfsign ingress
 sudo kubectl create -f - <<EOF
 ---
 apiVersion: networking.k8s.io/v1
