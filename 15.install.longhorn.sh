@@ -7,9 +7,9 @@ helm install longhorn longhorn/longhorn --namespace longhorn-system --create-nam
 
 
 #create user
-USER=admin; PASSWORD=xxxxxx; echo "${USER}:$(openssl passwd -stdin -apr1 <<< ${PASSWORD})" >> auth
-kubectl delete secret basic-auth -n longhorn-system
-kubectl create secret generic basic-auth --from-file=auth -n longhorn-system
+htpasswd -c ./auth admin
+
+kubectl create secret generic basic-auth --type=nginx.org/htpasswd --from-file=htpasswd=./auth -n longhorn-system
 
 
 # to use wild card
@@ -21,11 +21,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
-    nginx.ingress.kubernetes.io/auth-type: basic
-    nginx.ingress.kubernetes.io/ssl-redirect: 'false'
-    nginx.ingress.kubernetes.io/auth-secret: basic-auth
-    nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required '
-    nginx.ingress.kubernetes.io/proxy-body-size: 10000m
+    nginx.org/basic-auth-secret: basic-auth
   name: longhorn-ingress
   namespace: longhorn-system
 spec:
