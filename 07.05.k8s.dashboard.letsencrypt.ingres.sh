@@ -82,3 +82,37 @@ spec:
     - k8s.s3t.co
     secretName: s3t-cert-tls
 EOF
+
+
+
+#dns-01
+sudo kubectl apply -f - <<EOF
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+    nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
+    nginx.org/ssl-services: kubernetes-dashboard
+  name: k8s-dashboard-ingress
+  namespace: kubernetes-dashboard 
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: k8s.s3t.co
+    http:
+      paths:
+      - pathType: Prefix
+        path: /
+        backend:
+          service:
+            name: kubernetes-dashboard
+            port:
+              number: 443
+  tls:
+  - hosts:
+    - k8s.s3t.co
+    secretName: s3t-wildcard-cert-prod
+EOF
