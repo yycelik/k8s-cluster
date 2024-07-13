@@ -91,26 +91,26 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
-    nginx.org/client-max-body-size: '0'
-    nginx.org/proxy-connect-timeout: 10000s
-    nginx.org/proxy-read-timeout: 10000s
-  name: mysql-ingress
-  namespace: mysql-operator
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/backend-protocol: HTTP
+    nginx.ingress.kubernetes.io/ssl-passthrough: 'false'
+  name: grafana-ingress
+  namespace: monitoring
 spec:
   ingressClassName: nginx
   rules:
-  - host: mysql.s3t.co
+  - host: grafana.s3t.co
     http:
       paths:
       - pathType: Prefix
         path: /
         backend:
           service:
-            name: mycluster
+            name: grafana
             port:
-              number: 3306
+              number: 80
   tls:
   - hosts:
-    - mysql.s3t.co
+    - grafana.s3t.co
     secretName: s3t-wildcard-cert-prod
 EOF
