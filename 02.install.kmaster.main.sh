@@ -62,14 +62,26 @@ sudo systemctl restart containerd
 sudo systemctl enable containerd
 
 # add apt repository
-curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmour -o /etc/apt/trusted.gpg.d/kubernetes-xenial.gpg
-sudo apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 
 # before install kubelet kubeadm and kubectl
 sudo apt update
 
 # install kubelet kubeadm and kubectl
 sudo apt install -y kubelet kubeadm kubectl
+
+# get current statu and version
+#kubectl -n kube-system get cm kubeadm-config -o yaml
+
+# list version
+#apt list -a kubeadm
+
+# install spespfic version
+#sudo apt-get install -y kubeadm=1.30.5-1.1 --allow-downgrades
+
+# get upgrade plan
+#kubeadm upgrade plan
 
 # hold kubelet kubeadm and kubectl
 sudo apt-mark hold kubelet kubeadm kubectl
