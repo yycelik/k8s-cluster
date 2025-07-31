@@ -38,6 +38,9 @@ spec:
 EOF
 
 
+#to clean order
+#kubectl delete order s3t-wildcard-cert-prod-3-4058508564-1170114524
+
 
 # put that name to dns server with {Key}
 # _acme-challenge.<YOUR_DOMAIN> TEXT 
