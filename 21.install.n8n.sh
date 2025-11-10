@@ -6,23 +6,20 @@
 ######################################################
 
 # create namespace
-kubectl create namespace keycloak
+kubectl create namespace n8n
 
 # create database secret
-kubectl create secret generic db-app --from-literal=password='xxxxxx' --namespace my-n8n
+kubectl create secret generic db-app --from-literal=password='xxxxxx' --namespace n8n
 
 
 
-sudo cat >>/etc/hosts<<EOF
-namespace: my-n8n
+sudo cat >>n8n-values.yaml<<EOF
+namespace: n8n
 
 replicaCount: 1
 
 ingress:
   enabled: true
-  annotations:
-    kubernetes.io/ingress.class: "nginx"
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
   className: "nginx"
   hosts:
     - host: n8n.s3t.co
@@ -58,4 +55,4 @@ main:
       - ReadWriteOnce
 EOF
 
-helm install n8n oci://8gears.container-registry.com/library/n8n --version 1.0.4 --namespace my-n8n -f n8n-values2.yaml #--create-namespace
+helm install n8n oci://8gears.container-registry.com/library/n8n --version 1.33.1 --namespace n8n -f n8n-values.yaml #--create-namespace
