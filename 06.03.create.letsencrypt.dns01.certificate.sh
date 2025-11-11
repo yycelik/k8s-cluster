@@ -34,7 +34,26 @@ spec:
     name: letsencrypt-prod
   dnsNames:
   - "*.s3t.co"
+  - "s3t.co"
   - "*.nexus.s3t.co"
+EOF
+
+
+sudo kubectl create -f - <<EOF
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: edilek-wildcard-cert-prod
+  namespace: default
+spec:
+  secretName: edilek-wildcard-cert-prod
+  commonName: "*.edilek.com"
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-prod
+  dnsNames:
+  - "*.edilek.com"
+  - "edilek.com"
 EOF
 
 
