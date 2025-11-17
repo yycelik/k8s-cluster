@@ -10,6 +10,7 @@ helm install kubernetes-replicator mittwald/kubernetes-replicator
 #
 kubectl annotate secret s3t-wildcard-cert-prod replicator.v1.mittwald.de/replicate-to=*
 kubectl annotate secret edilek-wildcard-cert-prod replicator.v1.mittwald.de/replicate-to=*
+kubectl annotate secret nexus-s3t-co-docker-config replicator.v1.mittwald.de/replicate-to=*
 
 # no need for it
 sudo kubectl create -f - <<EOF
