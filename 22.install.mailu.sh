@@ -12,6 +12,7 @@ NAMESPACE="${NAMESPACE:-mailu}"
 MAILU_HOST="${MAILU_HOST:-mail.example.com}"
 TLS_SECRET="${TLS_SECRET:-mail-tls}"
 MAILU_IMAGE="${MAILU_IMAGE:-ghcr.io/mailu/nginx:2024.06.46}"
+SMTP_LISTENER_NAME="${SMTP_LISTENER_NAME:-smtp-200-listener}"
 
 kubectl get ns "${NAMESPACE}" >/dev/null 2>&1 || kubectl create ns "${NAMESPACE}"
 
@@ -74,6 +75,8 @@ spec:
         - secretRef:
             name: mailu-secret
         ports:
+        - name: smtp
+          containerPort: 25
         - name: http
           containerPort: 80
         - name: https
@@ -103,6 +106,9 @@ spec:
     app: mailu
     component: front
   ports:
+  - name: smtp
+    port: 25
+    targetPort: 25
   - name: http
     port: 80
     targetPort: 80
@@ -138,7 +144,26 @@ spec:
   - hosts:
     - ${MAILU_HOST}
     secretName: ${TLS_SECRET}
+---
+apiVersion: k8s.nginx.org/v1
+kind: TransportServer
+metadata:
+  name: smtp-mailu
+  labels:
+    app: mailu
+    component: front
+spec:
+  listener:
+    name: ${SMTP_LISTENER_NAME}
+    protocol: TCP
+  upstreams:
+  - name: smtp-upstream
+    service: mailu-front
+    port: 25
+  action:
+    pass: smtp-upstream
 EOF
 
 echo "Applied Mailu manifests to namespace: ${NAMESPACE}"
 echo "Host: ${MAILU_HOST}"
+echo "SMTP listener: ${SMTP_LISTENER_NAME}"
