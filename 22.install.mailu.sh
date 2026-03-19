@@ -7,16 +7,45 @@ set -euo pipefail
 # Notes:
 # - This is a minimal Mailu front deployment template.
 # - Update image versions, secrets, and hostnames before production use.
+# - Do NOT include ingress controller pod CIDR in MAILU_SUBNET.
 
 NAMESPACE="${NAMESPACE:-mailu}"
 MAILU_HOST="${MAILU_HOST:-mail.example.com}"
 TLS_SECRET="${TLS_SECRET:-mail-tls}"
 MAILU_IMAGE="${MAILU_IMAGE:-ghcr.io/mailu/nginx:2024.06.46}"
 SMTP_LISTENER_NAME="${SMTP_LISTENER_NAME:-smtp-200-listener}"
+MAILU_DOMAIN="${MAILU_DOMAIN:-${MAILU_HOST#*.}}"
+MAILU_SUBNET="${MAILU_SUBNET:-10.42.0.0/16}"
+POSTFIX_MYNETWORKS="${POSTFIX_MYNETWORKS:-127.0.0.1/32}"
+
+if [[ "${MAILU_SUBNET}" == *"92.68.0.0/16"* ]]; then
+  echo "ERROR: MAILU_SUBNET contains 92.68.0.0/16 (ingress pod CIDR)."
+  echo "This can allow unauthenticated relay via ingress pods."
+  echo "Use a dedicated internal subnet only (example: 10.42.0.0/16)."
+  exit 1
+fi
 
 kubectl get ns "${NAMESPACE}" >/dev/null 2>&1 || kubectl create ns "${NAMESPACE}"
 
 kubectl apply -n "${NAMESPACE}" -f - <<EOF
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mailu-postfix-overrides
+  labels:
+    app: mailu
+    component: postfix
+data:
+  postfix.cf: |
+    inet_protocols = ipv4
+    mynetworks = ${POSTFIX_MYNETWORKS}
+    smtpd_relay_restrictions = permit_sasl_authenticated, reject_unauth_destination
+    smtpd_sender_restrictions = check_sender_access hash:/etc/postfix/sender_access.map, reject_non_fqdn_sender, reject_unknown_sender_domain, permit
+  sender_access.map: |
+    # Add temporary blocks as needed:
+    # baduser@example.com REJECT blocked temporarily due spam abuse
+    # baddomain.tld REJECT blocked temporarily due spam abuse
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -25,9 +54,9 @@ metadata:
     app: mailu
     component: front
 data:
-  DOMAIN: s3t.co
+  DOMAIN: ${MAILU_DOMAIN}
   HOSTNAMES: ${MAILU_HOST}
-  SUBNET: 10.42.0.0/16,92.68.0.0/16
+  SUBNET: ${MAILU_SUBNET}
   WEBMAIL: roundcube
   WEB_ADMIN: /admin
   WEB_WEBMAIL: /webmail
@@ -166,4 +195,7 @@ EOF
 
 echo "Applied Mailu manifests to namespace: ${NAMESPACE}"
 echo "Host: ${MAILU_HOST}"
+echo "Domain: ${MAILU_DOMAIN}"
+echo "Mailu SUBNET: ${MAILU_SUBNET}"
+echo "Postfix mynetworks: ${POSTFIX_MYNETWORKS}"
 echo "SMTP listener: ${SMTP_LISTENER_NAME}"
