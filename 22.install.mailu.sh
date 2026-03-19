@@ -40,7 +40,7 @@ data:
     inet_protocols = ipv4
     mynetworks = ${POSTFIX_MYNETWORKS}
     smtpd_relay_restrictions = permit_sasl_authenticated, reject_unauth_destination
-    smtpd_sender_restrictions = check_sender_access hash:/etc/postfix/sender_access.map, reject_non_fqdn_sender, reject_unknown_sender_domain, permit
+    smtpd_sender_restrictions = check_sender_access lmdb:/etc/postfix/sender_access.map, reject_non_fqdn_sender, reject_unknown_sender_domain, permit
   sender_access.map: |
     # Add temporary blocks as needed:
     # baduser@example.com REJECT blocked temporarily due spam abuse
