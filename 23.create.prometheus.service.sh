@@ -1,10 +1,4 @@
-
-helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-helm repo update
-
 kubectl create namespace prometheus
-
-helm install prometheus prometheus-community/prometheus -n prometheus
 
 # copy longhorn basic-auth credentials to prometheus namespace
 kubectl get secret basic-auth -n longhorn-system -o jsonpath='{.data.htpasswd}' | base64 -d > ./auth
@@ -44,7 +38,8 @@ subsets:
     port: 9090
 EOF
 
-sudo cat >prometheus-ingress.yaml<<EOF
+sudo kubectl create -f - <<EOF
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -61,8 +56,8 @@ spec:
   - host: prometheus.s3t.co
     http:
       paths:
-      - path: /
-        pathType: Prefix
+      - pathType: Prefix
+        path: /
         backend:
           service:
             name: prometheus-service
@@ -73,5 +68,3 @@ spec:
     - prometheus.s3t.co
     secretName: s3t-wildcard-cert-prod
 EOF
-
-kubectl apply -f prometheus-ingress.yaml
