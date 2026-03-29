@@ -8,6 +8,18 @@ helm install -n cert-manager namecheap-webhook deploy/cert-manager-webhook-namec
 
 helm install --set email=yavuzyasincelik@gmail.com -n cert-manager letsencrypt-namecheap-issuer deploy/letsencrypt-namecheap-issuer/
 
+# If the cluster is behind NAT, the webhook may detect a private/pod egress IP instead of the
+# real public IP. Namecheap API validates the caller IP against its whitelist, so clientIP should
+# be set explicitly to the public IP that is whitelisted in Namecheap API Access.
+# Example:
+# helm upgrade --install -n cert-manager letsencrypt-namecheap-issuer deploy/letsencrypt-namecheap-issuer \
+#   --set email=yavuzyasincelik@gmail.com \
+#   --set-string solvers[0].dns01.webhook.config.clientIP={public-ip}
+# Example for this cluster:
+# helm upgrade --install -n cert-manager letsencrypt-namecheap-issuer deploy/letsencrypt-namecheap-issuer \
+#   --set email=yavuzyasincelik@gmail.com \
+#   --set-string solvers[0].dns01.webhook.config.clientIP=94.54.156.184
+
 sudo kubectl create -f - <<EOF
 apiVersion: v1
 kind: Secret
