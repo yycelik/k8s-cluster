@@ -9,6 +9,36 @@ MIMIR_REMOTE_WRITE_ENDPOINT="${MIMIR_REMOTE_WRITE_ENDPOINT:-http://mimir-gateway
 
 kubectl create namespace "${NAMESPACE}" --dry-run=client -o yaml | kubectl apply -f -
 
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-scraper-metrics
+  namespace: ${NAMESPACE}
+spec:
+  selector:
+    app.kubernetes.io/instance: otel-scraper
+    app.kubernetes.io/name: opentelemetry-collector
+  ports:
+    - name: metrics
+      port: 8888
+      targetPort: 8888
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-consumer-metrics
+  namespace: ${NAMESPACE}
+spec:
+  selector:
+    app.kubernetes.io/instance: otel-consumer
+    app.kubernetes.io/name: opentelemetry-collector
+  ports:
+    - name: metrics
+      port: 8888
+      targetPort: 8888
+EOF
+
 SCRAPER_VALUES="$(mktemp)"
 CONSUMER_VALUES="$(mktemp)"
 trap 'rm -f "${SCRAPER_VALUES}" "${CONSUMER_VALUES}"' EXIT
@@ -78,6 +108,23 @@ config:
           - job_name: mailu-exporter
             static_configs:
               - targets: ["192.168.0.240:32305"]
+          - job_name: otel-scraper
+            static_configs:
+              - targets: ["otel-scraper-metrics.${NAMESPACE}.svc.cluster.local:8888"]
+          - job_name: otel-consumer
+            static_configs:
+              - targets: ["otel-consumer-metrics.${NAMESPACE}.svc.cluster.local:8888"]
+          - job_name: mimir
+            static_configs:
+              - targets:
+                  - "mimir-compactor.mimir.svc.cluster.local:8080"
+                  - "mimir-distributor.mimir.svc.cluster.local:8080"
+                  - "mimir-gateway.mimir.svc.cluster.local:8080"
+                  - "mimir-ingester.mimir.svc.cluster.local:8080"
+                  - "mimir-querier.mimir.svc.cluster.local:8080"
+                  - "mimir-query-frontend.mimir.svc.cluster.local:8080"
+                  - "mimir-query-scheduler.mimir.svc.cluster.local:8080"
+                  - "mimir-store-gateway.mimir.svc.cluster.local:8080"
   processors:
     batch:
       send_batch_size: 200
