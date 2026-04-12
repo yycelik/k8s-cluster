@@ -76,11 +76,6 @@ config:
           scrape_interval: 15s
           scrape_timeout: 10s
         scrape_configs:
-          - job_name: prometheus
-            scrape_interval: 5s
-            scrape_timeout: 5s
-            static_configs:
-              - targets: ["192.168.0.151:9090"]
           - job_name: node
             static_configs:
               - targets: ["192.168.0.151:9100"]
