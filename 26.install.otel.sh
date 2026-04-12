@@ -79,11 +79,16 @@ config:
             static_configs:
               - targets: ["192.168.0.240:32305"]
   processors:
-    batch: {}
+    batch:
+      send_batch_size: 200
+      send_batch_max_size: 200
+      timeout: 1s
   exporters:
     kafka:
       brokers: ["${KAFKA_BROKERS}"]
       protocol_version: 2.0.0
+      producer:
+        max_message_bytes: 10485760
       metrics:
         topic: ${KAFKA_TOPIC}
         encoding: otlp_proto
