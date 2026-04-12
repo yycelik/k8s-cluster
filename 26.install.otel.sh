@@ -120,7 +120,23 @@ config:
                   - "mimir-query-frontend.mimir.svc.cluster.local:8080"
                   - "mimir-query-scheduler.mimir.svc.cluster.local:8080"
                   - "mimir-store-gateway.mimir.svc.cluster.local:8080"
+                labels:
+                  cluster: s3t-k8s
+                  namespace: mimir
   processors:
+    attributes/mimir_labels:
+      actions:
+        - key: cluster
+          value: s3t-k8s
+          action: upsert
+        - key: namespace
+          value: mimir
+          action: upsert
+      include:
+        match_type: regexp
+        metric_names:
+          - "cortex_.*"
+          - "thanos_.*"
     batch:
       send_batch_size: 200
       send_batch_max_size: 200
@@ -141,7 +157,7 @@ config:
     pipelines:
       metrics:
         receivers: [prometheus]
-        processors: [batch]
+        processors: [attributes/mimir_labels, batch]
         exporters: [kafka]
 EOF
 
