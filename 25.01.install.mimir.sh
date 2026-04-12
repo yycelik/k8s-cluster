@@ -112,6 +112,8 @@ compactor:
 
 mimir:
   structuredConfig:
+    limits:
+      max_label_names_per_series: 60
     memberlist:
       advertise_addr: \${POD_IP}
     blocks_storage:
