@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="mimir-full-topology" name="Mimir Vertical Topology">
-        <mxGraphModel dx="1267" dy="779" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="1800" background="#ffffff" math="0" shadow="0">
+        <mxGraphModel dx="1810" dy="1113" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="1800" background="#ffffff" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -45,29 +45,34 @@
                         <mxPoint x="660" y="910" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
+                <mxCell id="39" value="otel send request to both mimir(DC-A, DC-B)" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="30">
+                    <mxGeometry x="-0.0667" y="-1" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
                 <mxCell id="layer3_box" value="Layer 3: Collector (OTel Collector &amp;amp; Kafka)&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="rounded=1;arcSize=4;whiteSpace=wrap;html=1;fillColor=#cce5ff;strokeColor=#007bff;verticalAlign=top;align=left;spacingLeft=10;fontStyle=1;dropTarget=1;container=0;" parent="1" vertex="1">
-                    <mxGeometry x="50" y="920" width="1100" height="280" as="geometry"/>
+                    <mxGeometry x="50" y="940" width="1100" height="280" as="geometry"/>
                 </mxCell>
                 <mxCell id="23" style="edgeStyle=none;html=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=1;entryDx=0;entryDy=0;" parent="1" source="layer2_box" target="layer3_box" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="layer2_box" value="Layer 2: Applications &amp;amp; Datasource" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d4edda;strokeColor=#28a745;verticalAlign=top;align=left;spacingLeft=10;fontStyle=1;" parent="1" vertex="1">
-                    <mxGeometry x="50" y="1230" width="1100" height="150" as="geometry"/>
+                    <mxGeometry x="50" y="1250" width="1100" height="150" as="geometry"/>
                 </mxCell>
                 <mxCell id="src_api" value="API Gateway" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d4edda;strokeColor=#28a745;" parent="1" vertex="1">
-                    <mxGeometry x="125" y="1280" width="150" height="60" as="geometry"/>
+                    <mxGeometry x="125" y="1300" width="150" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="src_ocp" value="OpenShift / K8s" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d4edda;strokeColor=#28a745;" parent="1" vertex="1">
-                    <mxGeometry x="325" y="1280" width="150" height="60" as="geometry"/>
+                    <mxGeometry x="325" y="1300" width="150" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="src_spring" value="Spring Boot Actuator" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d4edda;strokeColor=#28a745;" parent="1" vertex="1">
-                    <mxGeometry x="525" y="1280" width="150" height="60" as="geometry"/>
+                    <mxGeometry x="525" y="1300" width="150" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="5" value="Kafka" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d4edda;strokeColor=#28a745;" parent="1" vertex="1">
-                    <mxGeometry x="725" y="1280" width="150" height="60" as="geometry"/>
+                    <mxGeometry x="725" y="1300" width="150" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="6" value="Redis" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d4edda;strokeColor=#28a745;" parent="1" vertex="1">
-                    <mxGeometry x="925" y="1280" width="150" height="60" as="geometry"/>
+                    <mxGeometry x="925" y="1300" width="150" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="glb_mimir" value="Global Load Balancer / DNS&lt;br&gt;(mimir.domain.com)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fcf8e3;strokeColor=#faebcc;fontStyle=1;" parent="1" vertex="1">
                     <mxGeometry x="400" y="370" width="400" height="50" as="geometry"/>
@@ -96,10 +101,15 @@
                 <mxCell id="e_mimir_a_ing_st" style="endArrow=classic;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;" parent="1" source="m_a_ingesters" target="storage_a" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
+                <mxCell id="40" value="each 2 hours" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="e_mimir_a_ing_st">
+                    <mxGeometry x="-0.1212" y="1" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
                 <mxCell id="e_compactor_a" style="endArrow=classic;startArrow=classic;html=1;edgeStyle=orthogonalEdgeStyle;" parent="1" source="storage_a" target="compactor_a" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="m_a_queries" value="mimir" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffaf0;strokeColor=#ffc107;fontStyle=1;" parent="1" vertex="1">
+                <mxCell id="m_a_queries" value="grafana" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffaf0;strokeColor=#ffc107;fontStyle=1;" parent="1" vertex="1">
                     <mxGeometry x="161" y="479" width="140" height="32" as="geometry"/>
                 </mxCell>
                 <mxCell id="m_a_qf" value="query-frontend" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffd166;strokeColor=#e0a800;fontStyle=1;" parent="1" vertex="1">
@@ -145,37 +155,37 @@
                     <mxGeometry x="580" y="580" width="110" height="70" as="geometry"/>
                 </mxCell>
                 <mxCell id="otel_receivers_box" value="&lt;span style=&quot;color: rgb(0, 0, 0);&quot;&gt;OTel Collector (DC-A)&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#0056b3;fontStyle=1;verticalAlign=top;dashed=1;" parent="1" vertex="1">
-                    <mxGeometry x="250" y="967.31" width="300" height="212.69" as="geometry"/>
+                    <mxGeometry x="250" y="987.31" width="300" height="212.69" as="geometry"/>
                 </mxCell>
                 <mxCell id="kafka_cluster" value="Apache Kafka A" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#d4edda;strokeColor=#28a745;fontStyle=0;" parent="1" vertex="1">
-                    <mxGeometry x="90" y="1100.19" width="110" height="65" as="geometry"/>
+                    <mxGeometry x="90" y="1120.19" width="110" height="65" as="geometry"/>
                 </mxCell>
                 <mxCell id="o_rec_a" value="OTel (App A)&lt;div&gt;&lt;span style=&quot;color: rgb(0, 0, 0);&quot;&gt;Consumer&amp;nbsp;&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#cce5ff;strokeColor=#007bff;fontStyle=0" parent="1" vertex="1">
-                    <mxGeometry x="325" y="1017.0035714285714" width="150" height="46.345" as="geometry"/>
+                    <mxGeometry x="325" y="1037.0035714285714" width="150" height="46.345" as="geometry"/>
                 </mxCell>
                 <mxCell id="27" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="8" target="kafka_cluster" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="8" value="OTel (App A)&lt;br&gt;&lt;span style=&quot;color: rgb(0, 0, 0);&quot;&gt;Producer&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#cce5ff;strokeColor=#007bff;fontStyle=0" parent="1" vertex="1">
-                    <mxGeometry x="325" y="1109.035824175824" width="150" height="47.30769230769231" as="geometry"/>
+                    <mxGeometry x="325" y="1129.035824175824" width="150" height="47.30769230769231" as="geometry"/>
                 </mxCell>
                 <mxCell id="26" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="o_rec_a" target="kafka_cluster" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="33" value="&lt;span style=&quot;color: rgb(0, 0, 0);&quot;&gt;OTel Collector (DC-B)&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#0056b3;fontStyle=1;verticalAlign=top;dashed=1;" parent="1" vertex="1">
-                    <mxGeometry x="660" y="967.31" width="300" height="212.69" as="geometry"/>
+                    <mxGeometry x="660" y="987.31" width="300" height="212.69" as="geometry"/>
                 </mxCell>
                 <mxCell id="34" value="Apache Kafka B" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#d4edda;strokeColor=#28a745;fontStyle=0;" parent="1" vertex="1">
-                    <mxGeometry x="1020" y="1100.19" width="110" height="65" as="geometry"/>
+                    <mxGeometry x="1020" y="1120.19" width="110" height="65" as="geometry"/>
                 </mxCell>
                 <mxCell id="35" value="OTel (App A)&lt;div&gt;&lt;span style=&quot;color: rgb(0, 0, 0);&quot;&gt;Consumer&amp;nbsp;&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#cce5ff;strokeColor=#007bff;fontStyle=0" parent="1" vertex="1">
-                    <mxGeometry x="735" y="1017.0035714285714" width="150" height="46.345" as="geometry"/>
+                    <mxGeometry x="735" y="1037.0035714285714" width="150" height="46.345" as="geometry"/>
                 </mxCell>
                 <mxCell id="36" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="37" target="34" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="37" value="OTel (App A)&lt;br&gt;&lt;span style=&quot;color: rgb(0, 0, 0);&quot;&gt;Producer&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#cce5ff;strokeColor=#007bff;fontStyle=0" parent="1" vertex="1">
-                    <mxGeometry x="735" y="1109.035824175824" width="150" height="47.30769230769231" as="geometry"/>
+                    <mxGeometry x="735" y="1129.035824175824" width="150" height="47.30769230769231" as="geometry"/>
                 </mxCell>
                 <mxCell id="38" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="35" target="34" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
