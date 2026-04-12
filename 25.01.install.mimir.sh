@@ -11,6 +11,7 @@ MINIO_SECRET_NAME="${MINIO_SECRET_NAME:-minio}"
 MINIO_ENDPOINT="${MINIO_ENDPOINT:-minio.minio.svc.cluster.local:9000}"
 BLOCKS_BUCKET="${BLOCKS_BUCKET:-mimir-blocks}"
 STORAGE_CLASS="${STORAGE_CLASS:-longhorn}"
+MC_IMAGE="${MC_IMAGE:-minio/mc:RELEASE.2025-08-13T08-35-41Z}"
 
 kubectl create namespace "${NAMESPACE}" --dry-run=client -o yaml | kubectl apply -f -
 
@@ -32,12 +33,11 @@ EOF
 kubectl -n "${NAMESPACE}" delete pod mimir-mc --ignore-not-found=true >/dev/null 2>&1 || true
 kubectl run mimir-mc \
   -n "${NAMESPACE}" \
-  --image=minio/mc:RELEASE.2026-03-26T22-19-05Z \
+  --image="${MC_IMAGE}" \
   --restart=Never \
   --env="MC_HOST_mimir=http://${MINIO_USER}:${MINIO_PASSWORD}@${MINIO_ENDPOINT}" \
-  --command -- /bin/sh -c "mc mb --ignore-existing mimir/${BLOCKS_BUCKET}"
-kubectl wait --for=condition=Ready pod/mimir-mc -n "${NAMESPACE}" --timeout=120s >/dev/null 2>&1 || true
-kubectl wait --for=jsonpath='{.status.phase}'=Succeeded pod/mimir-mc -n "${NAMESPACE}" --timeout=120s
+  --command -- sh -c "mc mb --ignore-existing mimir/${BLOCKS_BUCKET}"
+kubectl wait --for=jsonpath='{.status.phase}'=Succeeded pod/mimir-mc -n "${NAMESPACE}" --timeout=180s
 kubectl -n "${NAMESPACE}" delete pod mimir-mc --ignore-not-found=true >/dev/null 2>&1 || true
 
 VALUES_FILE="$(mktemp)"

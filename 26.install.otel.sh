@@ -185,6 +185,10 @@ config:
         topics: ["${KAFKA_TOPIC}"]
         encoding: otlp_proto
   processors:
+    attributes/drop_excess_metric_labels:
+      actions:
+        - pattern: ^container_label_.*
+          action: delete
     batch: {}
   exporters:
     prometheusremotewrite:
@@ -200,7 +204,7 @@ config:
     pipelines:
       metrics:
         receivers: [kafka]
-        processors: [batch]
+        processors: [attributes/drop_excess_metric_labels, batch]
         exporters: [prometheusremotewrite]
 EOF
 
