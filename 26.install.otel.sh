@@ -4,7 +4,7 @@ set -euo pipefail
 NAMESPACE="${NAMESPACE:-otel}"
 CHART_VERSION="${CHART_VERSION:-0.150.0}"
 KAFKA_BROKERS="${KAFKA_BROKERS:-192.168.0.151:9092}"
-KAFKA_TOPIC="${KAFKA_TOPIC:-otel-metrics}"
+KAFKA_TOPIC="${KAFKA_TOPIC:-otel-metrics-ordered}"
 MIMIR_REMOTE_WRITE_ENDPOINT="${MIMIR_REMOTE_WRITE_ENDPOINT:-http://mimir-gateway.mimir.svc.cluster.local/api/v1/push}"
 
 kubectl create namespace "${NAMESPACE}" --dry-run=client -o yaml | kubectl apply -f -
@@ -92,6 +92,10 @@ config:
             static_configs:
               - targets: ["192.168.0.240:32080"]
           - job_name: k8s-cadvisor
+            metric_relabel_configs:
+              - source_labels: [__name__]
+                regex: target_info
+                action: drop
             static_configs:
               - targets:
                   - "192.168.0.241:31180"
@@ -114,7 +118,6 @@ config:
               - targets:
                   - "mimir-compactor.mimir.svc.cluster.local:8080"
                   - "mimir-distributor.mimir.svc.cluster.local:8080"
-                  - "mimir-gateway.mimir.svc.cluster.local:8080"
                   - "mimir-ingester.mimir.svc.cluster.local:8080"
                   - "mimir-querier.mimir.svc.cluster.local:8080"
                   - "mimir-query-frontend.mimir.svc.cluster.local:8080"
@@ -137,6 +140,11 @@ config:
         metric_names:
           - "cortex_.*"
           - "thanos_.*"
+    filter/drop_target_info:
+      error_mode: ignore
+      metrics:
+        metric:
+          - name == "target_info"
     batch:
       send_batch_size: 200
       send_batch_max_size: 200
@@ -157,7 +165,7 @@ config:
     pipelines:
       metrics:
         receivers: [prometheus]
-        processors: [attributes/mimir_labels, batch]
+        processors: [filter/drop_target_info, attributes/mimir_labels, batch]
         exporters: [kafka]
 EOF
 
@@ -200,14 +208,25 @@ config:
       actions:
         - pattern: ^container_label_.*
           action: delete
+    filter/drop_target_info:
+      error_mode: ignore
+      metrics:
+        metric:
+          - name == "target_info"
     batch: {}
   exporters:
     prometheusremotewrite:
       endpoint: ${MIMIR_REMOTE_WRITE_ENDPOINT}
       headers:
         X-Scope-OrgID: anonymous
+      max_batch_request_parallelism: 1
+      remote_write_queue:
+        enabled: true
+        num_consumers: 1
       tls:
         insecure: true
+      target_info:
+        enabled: false
   extensions:
     health_check: {}
   service:
@@ -215,7 +234,7 @@ config:
     pipelines:
       metrics:
         receivers: [kafka]
-        processors: [attributes/drop_excess_metric_labels, batch]
+        processors: [filter/drop_target_info, attributes/drop_excess_metric_labels, batch]
         exporters: [prometheusremotewrite]
 EOF
 

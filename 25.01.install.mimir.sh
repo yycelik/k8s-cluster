@@ -6,6 +6,9 @@ RELEASE="${RELEASE:-mimir}"
 CHART_VERSION="${CHART_VERSION:-6.0.6}"
 KAFKA_ADDRESS="${KAFKA_ADDRESS:-192.168.0.151:9092}"
 KAFKA_TOPIC="${KAFKA_TOPIC:-mimir-ingest}"
+MIMIR_INGESTION_RATE="${MIMIR_INGESTION_RATE:-50000}"
+MIMIR_INGESTION_BURST_SIZE="${MIMIR_INGESTION_BURST_SIZE:-1000000}"
+MIMIR_RETENTION_PERIOD="${MIMIR_RETENTION_PERIOD:-168h}"
 MINIO_NAMESPACE="${MINIO_NAMESPACE:-minio}"
 MINIO_SECRET_NAME="${MINIO_SECRET_NAME:-minio}"
 MINIO_ENDPOINT="${MINIO_ENDPOINT:-minio.minio.svc.cluster.local:9000}"
@@ -113,6 +116,9 @@ compactor:
 mimir:
   structuredConfig:
     limits:
+      ingestion_rate: ${MIMIR_INGESTION_RATE}
+      ingestion_burst_size: ${MIMIR_INGESTION_BURST_SIZE}
+      compactor_blocks_retention_period: ${MIMIR_RETENTION_PERIOD}
       max_label_names_per_series: 60
     memberlist:
       advertise_addr: \${POD_IP}
