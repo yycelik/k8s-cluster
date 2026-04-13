@@ -54,6 +54,14 @@ image:
 
 replicaCount: 1
 
+resources:
+  requests:
+    cpu: 250m
+    memory: 1Gi
+  limits:
+    cpu: 1
+    memory: 3Gi
+
 ports:
   otlp:
     enabled: false
@@ -89,12 +97,21 @@ config:
             static_configs:
               - targets: ["192.168.0.240:32221"]
           - job_name: k8s-kube-state-metrics
+            scrape_interval: 30s
+            metric_relabel_configs:
+              - source_labels: [__name__]
+                regex: kube_pod_status_reason|kube_pod_status_phase|kube_pod_tolerations|kube_secret_owner|kube_secret_created|kube_secret_info|kube_secret_metadata_resource_version|kube_secret_type|kube_replicaset_created|kube_replicaset_metadata_generation|kube_replicaset_owner|kube_replicaset_status_observed_generation
+                action: drop
             static_configs:
               - targets: ["192.168.0.240:32080"]
           - job_name: k8s-cadvisor
+            scrape_interval: 30s
             metric_relabel_configs:
               - source_labels: [__name__]
                 regex: target_info
+                action: drop
+              - source_labels: [__name__]
+                regex: container_tasks_state|container_blkio_device_usage_total|container_memory_failures_total|container_fs_reads_total|container_fs_writes_total|container_fs_reads_bytes_total|container_fs_writes_bytes_total|container_fs_read_seconds_total|container_fs_io_time_seconds_total|container_fs_inodes_free
                 action: drop
             static_configs:
               - targets:
